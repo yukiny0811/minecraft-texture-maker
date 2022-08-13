@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        #done {
+            color: blue;
+            text-decoration:underline;
+            cursor: pointer;
+        }
+    </style>
+  </head>
+  <body> 
+    <div>
+        <input type="radio" id="1block" name="block-type">
+        <label for="1block">1ブロック用のテクスチャを作る！</label>
+
+        <input type="radio" id="3block" name="block-type">
+        <label for="3block">3x3x1ブロック用のテクスチャを作る！</label>
+    </div>
+    <div>
+        <input type="radio" id="size16" name="size">
+        <label for="size16">16x16</label>
+
+        <input type="radio" id="size32" name="size">
+        <label for="size32">32x32</label>
+
+        <input type="radio" id="size64" name="size">
+        <label for="size64">64x64</label>
+
+        <input type="radio" id="size128" name="size">
+        <label for="size128">128x128</label>
+    </div>
+
+    <h3 id="done">DONE</h3>
+  </body>
+  <script src="jquery-3.1.1.min.js" charset="utf-8"></script>
+  <script>
+    $("#done").on("click", e => {
+        if ($("#3block")[0].checked) {
+            if ($("#size128")[0].checked) {
+                location.href = "draw-3-128.html"
+            } else if ($("#size64")[0].checked) {
+                location.href = "draw-3-64.html"
+            } else if ($("#size32")[0].checked) {
+                location.href = "draw-3-32.html"
+            } else {
+                location.href = "draw-3-16.html"
+            }
+        } else {
+            if ($("#size128")[0].checked) {
+                location.href = "draw-1-128.html"
+            } else if ($("#size64")[0].checked) {
+                location.href = "draw-1-64.html"
+            } else if ($("#size32")[0].checked) {
+                location.href = "draw-1-32.html"
+            } else {
+                location.href = "draw-1-16.html"
+            }
+        }
+    })
+  </script>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="jquery-3.1.1.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="target" style="border: 2px solid black; width: 200px; height: 200px;">
+      ここに画像をドロップ
+    </div>
+    <img src="" id="preview" alt="">
+    <canvas id="canvas" width="0" height="0"></canvas>
+    <script>
+      
+      let reader = new FileReader()
+      reader.onload = function(ev) {
+        document.getElementById("preview").src = ev.target.result
+        
+        let canvas = document.getElementById("canvas")
+        let context = canvas.getContext("2d")
+        let image = new Image()
+        image.src = ev.target.result
+        $("#canvas").attr("width", image.width.toString())
+        $("#canvas").attr("height", image.height.toString())
+        context.drawImage(image, 0, 0)
+      }
+      
+      $("#target").on("dragover", function(_e) {
+        let e = _e
+        if (_e.originalEvent) {
+          e = _e.originalEvent;
+        }
+        e.preventDefault()
+        e.stopPropagation()
+      }) 
+      
+      $("#target").on("drop", function(_e) {
+        let e = _e
+        if (_e.originalEvent) {
+          e = _e.originalEvent;
+        }
+        e.stopPropagation()
+        e.preventDefault()
+        reader.readAsDataURL(e.dataTransfer.files[0])
+      })
+      
+    </script>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        #canvas {
+            margin: 30px;
+            width: 384px;
+            height: 384px;
+            background-color: white;
+            border: 3px solid black;
+        }
+        #color {
+            width: 100px;
+            height: 60px;
+        }
+        #colorDiv {
+            background-color: whitesmoke;
+            width: 300px;
+            overflow: hidden;
+        }
+        #download {
+            color: blue;
+            text-decoration:underline;
+            cursor: pointer;
+        }
+        #toolDiv {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 20px;
+        }
+        #allDiv {
+            display: flex;
+        }
+        #toolDiv > * {
+            margin: 10px 0;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="allDiv">
+        <canvas id="canvas" width="96" height="96"></canvas>
+        <div id="toolDiv">
+            <p>32x32x3x3 Alpha付きpng画像</p>
+            <div id="colorDiv">
+                <h3>色はここから選んでね！</h3>
+                <input type="color" id="color" value="#f6b73c">
+            </div>
+            <div id="penWidth">
+                <input type="radio" id="size1" name="size">
+                <label for="size1">大きさ 1</label>
+
+                <input type="radio" id="size2" name="size">
+                <label for="size2">大きさ 2</label>
+
+                <input type="radio" id="size3" name="size">
+                <label for="size3">大きさ 3</label>
+
+                <input type="radio" id="size4" name="size">
+                <label for="size4">大きさ 4</label>
+            </div>
+            <h3 id="download">DOWNLOAD</h3>
+        </div>
+    </div>
+    <script src="jquery-3.1.1.min.js" charset="utf-8"></script>
+    <script src="jszip.min.js" charset="utf-8"></script>
+    <script>
+        let canvas = document.getElementById("canvas")
+        let ct = canvas.getContext("2d")
+        ct.imageSmoothingEnabled = false
+        let dpr = window.devicePixelRatio
+        let id = ct.createImageData(1,1)
+        let d  = id.data
+        canvas.style.imageRendering = "pixelated";
+
+        let imageSize = 32
+        let scaleSize = 384 / (imageSize * 3)
+
+        let canvasBounding = canvas.getBoundingClientRect();
+
+
+        let isDrawing = false;
+
+        let penWidth = 1
+
+        $("#penWidth").on("click", e => {
+            if ($("#size1")[0].checked) {
+                penWidth = 1
+            } else if ($("#size2")[0].checked) {
+                penWidth = 2
+            } else if ($("#size3")[0].checked) {
+                penWidth = 3
+            } else if ($("#size4")[0].checked) {
+                penWidth = 4
+            }
+        })
+
+        $("#canvas").on("mousedown", e => {
+            e.preventDefault()
+            isDrawing = true;
+            // d[0] = 255
+            // d[1] = 12
+            // d[2] = 12
+            // d[3] = 255
+            // ct.putImageData(id, 3, 3)
+        })
+
+        $("#canvas").on("mousemove", e => {
+            e.preventDefault()
+            if (!isDrawing) return
+            let xpos = parseInt((e.clientX - canvasBounding.x) / scaleSize)
+            let ypos = parseInt((e.clientY - canvasBounding.y) / scaleSize)
+            ct.beginPath()
+            ct.fillStyle = $("#color")[0].value;
+            if (penWidth == 1) {
+                ct.rect(xpos, ypos, 1, 1)
+            } else {
+                ct.arc(xpos, ypos, penWidth / 2, 0, Math.PI * 2)
+            }
+            ct.closePath()
+            ct.fill()
+        })
+
+        $(window).on("mouseup", e => {
+            e.preventDefault()
+            isDrawing = false;
+        })
+
+        $("#download").on("click", e => {
+            let links = []
+
+            for (let tempX = 0; tempX < 3; tempX++) {
+                for (let tempY = 0; tempY < 3; tempY++) {
+                    var buffer = document.createElement('canvas')
+                    buffer.attributes.width = imageSize
+                    buffer.attributes.height = imageSize
+                    var b_ctx = buffer.getContext('2d')
+
+                    buffer.width = imageSize
+                    buffer.height = imageSize
+                    b_ctx.drawImage(canvas, tempX * imageSize, tempY * imageSize, imageSize, imageSize,
+                                    0, 0, buffer.width, buffer.height)
+                    let link = document.createElement('a')
+                    link.href = buffer.toDataURL()
+                    link.download = 'canvas-' + tempX.toString()  + '-' + tempY.toString() + '.png'
+                    // link.click()
+                    links.push(link)
+                }
+            }
+
+            let zip = new JSZip()
+            const folderName = "images"
+            let folder = zip.folder(folderName)
+            links.forEach(l => {
+                folder.file(l.download, l.href.slice(22), {base64: true})
+            });
+
+            zip.generateAsync({ type: "blob" }).then(blob => {
+
+                let dlLink = document.createElement("a");
+
+                const dataUrl = URL.createObjectURL(blob);
+                dlLink.href = dataUrl;
+                dlLink.download = `${folderName}.zip`;
+
+                document.body.insertAdjacentElement("beforeEnd", dlLink);
+                dlLink.click();
+                dlLink.remove();
+
+                setTimeout(function() {
+                window.URL.revokeObjectURL(dataUrl);
+                }, 1000);
+            });
+        })
+    </script>
+  </body>
+</html>
